@@ -26,6 +26,7 @@ def main(account_value):
     account_value
     error_handling(account_value)
     
+    print("\nPlease enter your Charles Schwab Login Info:")
     os.environ['SCHWAB_USERNAME'] = input("Username: ")
     os.environ['SCHWAB_PASSWORD'] = getpass()
     
@@ -34,7 +35,7 @@ def main(account_value):
     
     '''
     options = webdriver.ChromeOptions()
-    options.add_argument('headless')
+    options.setHeadless(true)
     '''
     
     driver = webdriver.Chrome('./chromedriver_2') # , options=options)
@@ -43,10 +44,18 @@ def main(account_value):
     print("\nSucessfully logged in!\n")  
             
     if account_value:
-        start_date = datetime.datetime.strptime(account_value[0], '%Y-%m-%d')
-        end_date = None
+        end_date = datetime.datetime.now()
         if len(account_value) == 2:
             end_date = datetime.datetime.strptime(account_value[1], '%Y-%m-%d')
+        
+        if account_value[0] == "week":
+            start_date = end_date - datetime.timedelta(weeks=1)
+        elif account_value[0] == "month":
+            start_date = end_date - datetime.timedelta(months=1)
+        else:    
+            start_date = datetime.datetime.strptime(account_value[0], '%Y-%m-%d')
+        
+        
             
         graph_account_value(driver, start_date, end_date)
 
@@ -58,7 +67,8 @@ def error_handling(account_value):
         # Assert arguments are in format YYYY-MM-DD
         try:
             for date in account_value:
-                datetime.datetime.strptime(date, '%Y-%m-%d')
+                if date != "week" and date != "month":
+                    datetime.datetime.strptime(date, '%Y-%m-%d')
         except ValueError:
             raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 
@@ -106,9 +116,6 @@ def graph_account_value(driver, start_date, end_date):
     test = driver.find_elements_by_tag_name("tr")
     date_values = []
     dollar_values = []
-    
-    if not end_date:
-        end_date = datetime.datetime.now()
     
     num_days = (end_date - start_date).days
     
