@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import datetime
+from dateutil.relativedelta import *
 from datetime import date
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -49,9 +50,9 @@ def main(account_value):
             end_date = datetime.datetime.strptime(account_value[1], '%Y-%m-%d')
         
         if account_value[0] == "week":
-            start_date = end_date - datetime.timedelta(weeks=1)
+            start_date = end_date - datetime.timedelta(days=7)
         elif account_value[0] == "month":
-            start_date = end_date - datetime.timedelta(months=1)
+            start_date = end_date - relativedelta(months=1)
         else:    
             start_date = datetime.datetime.strptime(account_value[0], '%Y-%m-%d')
         
@@ -117,7 +118,7 @@ def graph_account_value(driver, start_date, end_date):
     date_values = []
     dollar_values = []
     
-    num_days = (end_date - start_date).days
+    num_days = (end_date - start_date).days + 1
     
     now_til_end_date = (datetime.datetime.now() - end_date).days
     
