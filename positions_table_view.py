@@ -15,6 +15,7 @@ import click
 from pandas.plotting import register_matplotlib_converters
 from getpass import getpass
 from tqdm import tqdm
+import time
 from progressbar import ProgressBar
 register_matplotlib_converters()
 
@@ -34,13 +35,14 @@ def main(account_value):
     login_url = 'https://client.schwab.com/Login/SignOn/CustomerCenterLogin.aspx'
     account_url = 'https://client.schwab.com/clientapps/accounts/summary/'
     
-    '''
-    options = webdriver.ChromeOptions()
-    options.setHeadless(true)
-    '''
     
-    driver = webdriver.Chrome('./chromedriver_2') # , options=options)
-    
+    # options = webdriver.ChromeOptions()
+    # options.add_argument("--headless")
+    # options.add_argument("--allow-running-insecure-content")
+    # options.add_argument("--ignore-certificate-errors")
+    # options.add_argument("--start-maximised")
+    driver = webdriver.Chrome('./chromedriver 2') # , options=options)
+    # driver = webdriver.PhantomJS('./phantomjs')
     login(driver)
     print("\nSucessfully logged in!\n")  
             
@@ -93,15 +95,9 @@ def login(driver):
 
 def graph_account_value(driver, start_date, end_date):
     # Open Table View on account summary page
+    time.sleep(5)
     driver.implicitly_wait(10)
-    '''
-    try:
-        table_view_button = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, "Table View"))
-        )
-    finally:
-        driver.quit()
-    '''
+ 
     table_view_button = driver.find_element_by_partial_link_text("Table View")
     table_view_button.click()
     
@@ -134,6 +130,10 @@ def graph_account_value(driver, start_date, end_date):
             dollar_amt = float(''.join(values[1].text[1:].split(',')))
             dollar_values.append(dollar_amt)
 
+    # Print increase
+    increase = (dollar_values[0] - dollar_values[-1]) / dollar_values[0]
+    print(str(increase*100) + "% increase in " + str(num_days/365*12) + " months")
+    
     # Show graph
     plt.plot(date_values, dollar_values)
     plt.show()
